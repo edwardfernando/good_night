@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe "Api::V1::ClockInsControllers", type: :request do
   let(:user) { FactoryBot.create(:user) }
 
-  describe "POST /index" do
+  describe "POST #create" do
     before do
       post api_v1_user_clock_ins_path(user_id: user.id)
     end
@@ -18,7 +18,24 @@ RSpec.describe "Api::V1::ClockInsControllers", type: :request do
     end
   end
 
-  describe "GET /index" do
+  describe "DELETE #destroy" do
+    before do
+      FactoryBot.create_list(:sleep, 3, user: user)
+      delete api_v1_user_clock_ins_path(user_id: user.id)
+    end
+
+    it 'updates the last clockin record and set the clock_out to current time' do
+      expect(user.sleeps.last.clock_out).to be_present
+      expect(user.sleeps.last.duration).to be_present
+    end
+
+    it 'returns an ok message' do
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("clocked out successfully")
+    end
+  end
+
+  describe "GET #index" do
     before do
       FactoryBot.create_list(:sleep, 3, user: user)
       get api_v1_user_clock_ins_path(user_id: user.id)

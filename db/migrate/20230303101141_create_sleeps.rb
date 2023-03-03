@@ -4,7 +4,7 @@ class CreateSleeps < ActiveRecord::Migration[7.0]
       t.references :user, null: false, foreign_key: true
       t.datetime :clock_in, default: -> { 'CURRENT_TIMESTAMP' }
       t.datetime :clock_out
-      t.integer :duration
+      t.float :duration
       t.timestamps
     end
   end

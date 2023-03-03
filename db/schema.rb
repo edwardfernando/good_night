@@ -18,7 +18,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_03_03_101141) do
     t.bigint "user_id", null: false
     t.datetime "clock_in", default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "clock_out"
-    t.integer "duration"
+    t.float "duration"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_sleeps_on_user_id"
