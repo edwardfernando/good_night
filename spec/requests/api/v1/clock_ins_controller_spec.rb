@@ -12,9 +12,10 @@ RSpec.describe "Api::V1::ClockInsControllers", type: :request do
       expect(user.sleeps.count).to eq(1)
     end
 
-    it "return an ok message" do
+    it "returns an ok message" do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("clocked in successfully")
+      expect(response.body).to include(user.sleeps.order(created_at: :desc).to_json)
     end
   end
 
