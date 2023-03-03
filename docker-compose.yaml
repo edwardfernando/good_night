@@ -1,0 +1,16 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: good_night
+      POSTGRES_PASSWORD: good_night_password
+      POSTGRES_DB: good_night_development
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  db-data:
