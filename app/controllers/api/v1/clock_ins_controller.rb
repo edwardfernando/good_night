@@ -1,8 +1,11 @@
 class Api::V1::ClockInsController < ApplicationController
     def create
-        # do not allow if the last clock in hasnt been clocked-out
-        # need to be careful to retrieve all clock_ins
-        clock_in = current_user.sleeps.create!
+        last_record = current_user.sleeps.last
+        if last_record.present?
+            return render json: { status: :bad_request, message: "you need to clock out first" }, status: :bad_request if last_record.clock_out.nil?
+        end
+
+        current_user.sleeps.create!
         render json: { status: :ok, message: "clocked in successfully", clock_ins: current_user.sleeps.order(created_at: :desc)}
     end
 

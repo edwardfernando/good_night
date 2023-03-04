@@ -4,18 +4,32 @@ RSpec.describe "Api::V1::ClockInsControllers", type: :request do
   let(:user) { FactoryBot.create(:user) }
 
   describe "POST #create" do
-    before do
-      post api_v1_user_clock_ins_path(user_id: user.id)
+    context 'last clock_in has not been clocked out' do
+      before do
+        FactoryBot.create(:sleep, :with_empty_clock_out, user: user)
+        post api_v1_user_clock_ins_path(user_id: user.id)
+      end
+
+      it "return bad_request" do
+        expect(response).to have_http_status(:bad_request)
+        expect(response.body).to include("you need to clock out first")
+      end
     end
 
-    it 'creates a new clock for the user' do
-      expect(user.sleeps.count).to eq(1)
-    end
+    context 'all clock_ins have been clocked out' do
+      before do
+        post api_v1_user_clock_ins_path(user_id: user.id)
+      end
 
-    it "returns an ok message" do
-      expect(response).to have_http_status(:ok)
-      expect(response.body).to include("clocked in successfully")
-      expect(response.body).to include(user.sleeps.order(created_at: :desc).to_json)
+      it 'creates a new clock for the user' do
+        expect(user.sleeps.count).to eq(1)
+      end
+
+      it "returns an ok message" do
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("clocked in successfully")
+        expect(response.body).to include(user.sleeps.order(created_at: :desc).to_json)
+      end
     end
   end
 
