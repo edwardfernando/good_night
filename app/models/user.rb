@@ -1,3 +1,14 @@
+# Model for users of the application. A user has many sleep records and can follow and be followed by other users.
+
+# Associations:
+# - sleeps: the sleep records belonging to this user
+# - followed_users: the users that this user is following
+# - followees: the users that this user is following (through the followed_users association)
+# - following_users: the users that are following this user
+# - followers: the users that are following this user (through the following_users association)
+#
+# Validations:
+# - name: must be present
 class User < ApplicationRecord
     has_many :sleeps
 
