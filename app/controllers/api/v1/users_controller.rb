@@ -20,6 +20,17 @@ class Api::V1::UsersController < ApplicationController
     render json: { status: :ok, message: "successfully unfollowing #{@user.name}" }
   end
 
+  def sleep_records
+    @user = User.find(params[:id])
+    # only friend that can see the sleep record
+    follow = Follow.find_by(follower_id: current_user.id, followee_id: @user.id)
+    if follow.nil?
+      return render json: { status: :bad_request, message: "you need to follow #{@user.name} to see the sleep records" }, status: :bad_request
+    end
+
+    return render json: { status: :ok, name: @user.name, sleep_records: @user.sleeps.order(duration: :desc) }
+  end
+
   private
 
   def user_params

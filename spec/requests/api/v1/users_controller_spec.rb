@@ -71,4 +71,31 @@ RSpec.describe "Api::V1::UsersController", type: :request do
       end
     end
   end
+
+  describe 'GET #sleep_records' do
+    context 'not following' do
+      it 'returns sleep_records' do
+        user_1 = FactoryBot.create(:user)
+        user_2 = FactoryBot.create(:user)
+
+        # user_1 follows user_2
+        user_1.followees << user_2
+
+        get api_v1_user_sleep_records_path(user_id: user_1.id, id: user_2.id)
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("sleep_records")
+      end
+    end
+
+    context 'following' do
+      it 'returns bad request' do
+        user_1 = FactoryBot.create(:user)
+        user_2 = FactoryBot.create(:user)
+
+        get api_v1_user_sleep_records_path(user_id: user_1.id, id: user_2.id)
+        expect(response).to have_http_status(:bad_request)
+        expect(response.body).to include("you need to follow #{user_2.name} to see the sleep records")
+      end
+    end
+  end
 end
