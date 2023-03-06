@@ -28,4 +28,47 @@ RSpec.describe "Api::V1::UsersController", type: :request do
       end
     end
   end
+
+  describe 'POST #follow' do
+    context 'following ID presents' do
+      it 'add new record of followees' do
+        user_1 = FactoryBot.create(:user)
+        user_2 = FactoryBot.create(:user)
+
+        post api_v1_user_follow_user_path(user_id: user_1.id, id: user_2.id)
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("successfully following #{user_2.name}")
+        expect(user_1.followees.pluck(:id)).to include(user_2.id)
+        expect(user_2.followers.pluck(:id)).to include(user_1.id)
+      end
+    end
+
+    context 'following ID non existence' do
+      it 'returns record not found' do
+        user_1 = FactoryBot.create(:user)
+
+        post api_v1_user_follow_user_path(user_id: user_1.id, id: 9999)
+        expect(response).to have_http_status(:not_found)
+        expect(response.body).to include("Couldn't find User with 'id'=9999")
+      end
+    end
+  end
+
+  describe 'POST #unfollow' do
+    context 'both followee and following are exist' do
+      it 'deletes the association' do
+        user_1 = FactoryBot.create(:user)
+        user_2 = FactoryBot.create(:user)
+
+        # user_1 follows user_2
+        user_1.followees << user_2
+
+        post api_v1_user_unfollow_user_path(user_id: user_1.id, id: user_2.id)
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("successfully unfollowing #{user_2.name}")
+
+        expect(user_1.followees.pluck(:id)).not_to include(user_2.id)
+      end
+    end
+  end
 end

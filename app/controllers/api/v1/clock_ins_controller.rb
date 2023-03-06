@@ -21,9 +21,5 @@ class Api::V1::ClockInsController < ApplicationController
         render json: { status: :ok, clock_ins: clock_ins}
     end
 
-    private
 
-    def current_user
-        @current_user ||= User.find_by(id: params[:user_id] || params[:id])
-    end
 end

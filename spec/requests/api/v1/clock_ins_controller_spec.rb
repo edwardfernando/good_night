@@ -39,7 +39,7 @@ RSpec.describe "Api::V1::ClockInsControllers", type: :request do
       delete api_v1_user_clock_ins_path(user_id: user.id)
     end
 
-    it 'updates the last clockin record and set the clock_out to current time' do
+    it 'updates the last clocks in record and set the clock_out to current time' do
       expect(user.sleeps.last.clock_out).to be_present
       expect(user.sleeps.last.duration).to be_present
     end
