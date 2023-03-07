@@ -12,7 +12,8 @@ RSpec.describe "Api::V1::ClockInsControllers", type: :request do
 
       it "return bad_request" do
         expect(response).to have_http_status(:bad_request)
-        expect(response.body).to include("you need to clock out first")
+        responseObject = Response.to_response(response.body)
+        expect(responseObject.message).to match("you need to clock out first")
       end
     end
 
@@ -27,8 +28,9 @@ RSpec.describe "Api::V1::ClockInsControllers", type: :request do
 
       it "returns an ok message" do
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include("clocked in successfully")
-        expect(response.body).to include(user.sleeps.order(created_at: :desc).to_json)
+        responseObject = Response.to_response(response.body)
+        expect(responseObject.message).to match("clocked in successfully")
+        expect(responseObject.data).to match(user.sleeps.order(created_at: :desc).as_json)
       end
     end
   end
@@ -46,7 +48,8 @@ RSpec.describe "Api::V1::ClockInsControllers", type: :request do
 
     it 'returns an ok message' do
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("clocked out successfully")
+      responseObject = Response.to_response(response.body)
+      expect(responseObject.message).to match("clocked out successfully")
     end
   end
 
@@ -57,13 +60,10 @@ RSpec.describe "Api::V1::ClockInsControllers", type: :request do
     end
 
     it "returns list of clock_ins belong to the current user" do
-      expected_result = {
-        status: :ok,
-        clock_ins: user.sleeps.order(created_at: :desc).as_json
-      }
-
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include(expected_result.to_json)
+      responseObject = Response.to_response(response.body)
+      expect(responseObject.message).to match("success")
+      expect(responseObject.data).to match(user.sleeps.order(created_at: :desc).as_json)
     end
   end  
 end

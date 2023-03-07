@@ -11,10 +11,10 @@ class ApplicationController < ActionController::API
 
   private
   def handle_error(exception)
-    render json: { error: exception }, status: :internal_server_error
+    render json: Response.new(status: :bad_request, message: "fail", errors: exception), status: :internal_server_error
   end
 
   def handle_record_not_found(exception)
-    render json: { error: exception }, status: :not_found
+    render json: Response.new(status: :not_found, message: "fail", errors: exception), status: :not_found
   end
 end

@@ -11,7 +11,9 @@ RSpec.describe "Api::V1::UsersController", type: :request do
         }
         post api_v1_users_path, params: user_params
         expect(response).to have_http_status(:created)
-        expect(response.body).to include('John')
+        responseObject = Response.to_response(response.body)
+        expect(responseObject.message).to match("success")
+        expect(responseObject.data).to match(User.first.as_json)
       end
     end
 
@@ -24,7 +26,9 @@ RSpec.describe "Api::V1::UsersController", type: :request do
         }
         post api_v1_users_path, params: user_params
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.body).to include("Name can't be blank")
+        responseObject = Response.to_response(response.body)
+        expect(responseObject.message).to match("fail")
+        expect(responseObject.errors).to match(["Name can't be blank"])
       end
     end
   end
@@ -37,7 +41,8 @@ RSpec.describe "Api::V1::UsersController", type: :request do
 
         post api_v1_user_follow_user_path(user_id: user_1.id, id: user_2.id)
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include("successfully following #{user_2.name}")
+        responseObject = Response.to_response(response.body)
+        expect(responseObject.message).to match("successfully following #{user_2.name}")
         expect(user_1.followees.pluck(:id)).to include(user_2.id)
         expect(user_2.followers.pluck(:id)).to include(user_1.id)
       end
@@ -48,8 +53,10 @@ RSpec.describe "Api::V1::UsersController", type: :request do
         user_1 = FactoryBot.create(:user)
 
         post api_v1_user_follow_user_path(user_id: user_1.id, id: 9999)
+        responseObject = Response.to_response(response.body)
         expect(response).to have_http_status(:not_found)
-        expect(response.body).to include("Couldn't find User with 'id'=9999")
+        expect(responseObject.message).to match("fail")
+        expect(responseObject.errors).to match("[Couldn't find User with 'id'=9999]")
       end
     end
   end
@@ -65,7 +72,8 @@ RSpec.describe "Api::V1::UsersController", type: :request do
 
         post api_v1_user_unfollow_user_path(user_id: user_1.id, id: user_2.id)
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include("successfully unfollowing #{user_2.name}")
+        responseObject = Response.to_response(response.body)
+        expect(responseObject.message).to match("successfully unfollowing #{user_2.name}")
 
         expect(user_1.followees.pluck(:id)).not_to include(user_2.id)
       end
@@ -77,13 +85,15 @@ RSpec.describe "Api::V1::UsersController", type: :request do
       it 'returns sleep_records' do
         user_1 = FactoryBot.create(:user)
         user_2 = FactoryBot.create(:user)
+        user_2.sleeps << FactoryBot.create(:sleep)
 
         # user_1 follows user_2
         user_1.followees << user_2
 
         get api_v1_user_sleep_records_path(user_id: user_1.id, id: user_2.id)
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include("sleep_records")
+        responseObject = Response.to_response(response.body)
+        expect(responseObject.data).to match(user_2.sleeps.as_json)
       end
     end
 
@@ -94,7 +104,8 @@ RSpec.describe "Api::V1::UsersController", type: :request do
 
         get api_v1_user_sleep_records_path(user_id: user_1.id, id: user_2.id)
         expect(response).to have_http_status(:bad_request)
-        expect(response.body).to include("you need to follow #{user_2.name} to see the sleep records")
+        responseObject = Response.to_response(response.body)
+        expect(responseObject.message).to match("you need to follow #{user_2.name} to see the sleep records")
       end
     end
   end
